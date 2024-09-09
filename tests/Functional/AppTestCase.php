@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional;
 
-use App\Infrastructure\Security\AccessTokenChecker;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -43,7 +42,6 @@ class AppTestCase extends WebTestCase
             [],
             [
                 'CONTENT_TYPE' => 'application/json',
-                'HTTP_' . AccessTokenChecker::HEADER_KEY => $_ENV['BACKEND_ACCESS_TOKEN']
             ]
         );
 

@@ -1,5 +1,8 @@
 parameters:
-
+    currency_exchange_rate:
+        data_providers:
+            ecb: enabled
+            cbr: enabled
 
 services:
     _defaults:
@@ -24,3 +27,20 @@ services:
     App\Infrastructure\Messenger\CommandBus\CommandBus:
         arguments: [ '@messenger.bus.commands' ]
     App\Infrastructure\Messenger\CommandBus\CommandBusInterface: '@App\Infrastructure\Messenger\CommandBus\CommandBus'
+
+    App\Infrastructure\Repository\CurrencyExchangeRateRepository: ~
+    App\Domain\Repository\CurrencyExchangeRateRepositoryInterface: '@App\Infrastructure\Repository\CurrencyExchangeRateRepository'
+
+    App\Infrastructure\ExternalAPI\ECB\ECBClient:
+        arguments:
+            $baseUrl: '%env(ECB_API_BASE_URL)%'
+    App\Infrastructure\ExternalAPI\ECB\ECBClientInterface: '@App\Infrastructure\ExternalAPI\ECB\ECBClient'
+    App\Infrastructure\ExternalAPI\ECB\Decorator\ECBAPIClientRetryDecorator:
+        decorates: App\Infrastructure\ExternalAPI\ECB\ECBClient
+
+    App\Infrastructure\ExternalAPI\CBR\CBRClient:
+        arguments:
+            $baseUrl: '%env(CBR_API_BASE_URL)%'
+    App\Infrastructure\ExternalAPI\CBR\CBRClientInterface: '@App\Infrastructure\ExternalAPI\CBR\CBRClient'
+    App\Infrastructure\ExternalAPI\CBR\Decorator\CBRAPIClientRetryDecorator:
+        decorates: App\Infrastructure\ExternalAPI\CBR\CBRClient

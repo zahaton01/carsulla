@@ -6,7 +6,7 @@ namespace App\Domain\Exception;
 
 use Exception;
 
-class DoctorNotFoundException extends Exception
+class CurrencyExchangeRateNotFoundException extends Exception
 {
 
 }
