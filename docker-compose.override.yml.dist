@@ -1,0 +1,9 @@
+services:
+    nginx:
+        build:
+            target: prod-nginx
+        extra_hosts:
+          - "host.docker.internal:host-gateway"
+    php:
+        extra_hosts:
+          - "host.docker.internal:host-gateway"

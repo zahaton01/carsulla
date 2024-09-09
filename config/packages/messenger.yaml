@@ -1,0 +1,44 @@
+parameters:
+    amqp_doctors_sync_dsn: '%env(MESSENGER_TRANSPORT_DSN)%/%2f/sync_doctors'
+    amqp_doctors_sync_failed_dsn: '%env(MESSENGER_TRANSPORT_DSN)%/%2f/sync_doctors_failed'
+    amqp_doctor_slots_sync_dsn: '%env(MESSENGER_TRANSPORT_DSN)%/%2f/sync_doctor_slots'
+    amqp_doctor_slots_failed_sync_dsn: '%env(MESSENGER_TRANSPORT_DSN)%/%2f/sync_doctor_slots_failed'
+
+framework:
+    messenger:
+        default_bus: messenger.bus.commands
+        buses:
+            messenger.bus.commands:
+                middleware:
+                    - doctrine_ping_connection
+
+        transports:
+            amqp_doctors_sync:
+                dsn: '%amqp_doctors_sync_dsn%'
+                failure_transport: amqp_doctors_sync_failed
+                retry_strategy:
+                    max_retries: 3
+                    delay: 1000
+                    multiplier: 2
+            amqp_doctors_sync_failed:
+                dsn: '%amqp_doctors_sync_failed_dsn%'
+                retry_strategy:
+                    max_retries: 10
+                    delay: 1000
+                    multiplier: 2
+            amqp_doctor_slots_sync:
+                dsn: '%amqp_doctor_slots_sync_dsn%'
+                failure_transport: amqp_doctor_slots_sync_failed
+                retry_strategy:
+                    max_retries: 3
+                    delay: 1000
+                    multiplier: 2
+            amqp_doctor_slots_sync_failed:
+                dsn: '%amqp_doctor_slots_failed_sync_dsn%'
+                retry_strategy:
+                    max_retries: 3
+                    delay: 1000
+                    multiplier: 2
+
+        routing:
+#            App\Application\EntityDataSync\Doctor\DataSync\SyncDoctorCommand: amqp_doctors_sync

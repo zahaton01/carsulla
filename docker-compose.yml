@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+    nginx:
+        image: nginx:latest
+        container_name: ${CONTAINER_NAME_PREFIX}-nginx
+        ports:
+            - ${NGINX_HTTP_PORT}:80
+            - ${NGINX_HTTPS_PORT}:443
+        build:
+            context: .
+            dockerfile: ./docker/nginx/Dockerfile
+            target: dev-nginx
+        volumes:
+            - ./:/var/www/html
+
+        restart: unless-stopped
+        depends_on:
+            - php
+        networks:
+            - backend
+
+    php:
+        restart: unless-stopped
+        build:
+            context: .
+            dockerfile: ./docker/php/Dockerfile
+            args:
+                APP_ENV: ${APP_ENV}
+        container_name: ${CONTAINER_NAME_PREFIX}-php
+        networks:
+            - backend
+        volumes:
+            - ./:/var/www/html
+
+    db:
+        restart: unless-stopped
+        image: postgres:latest
+        container_name: ${CONTAINER_NAME_PREFIX}-db
+        environment:
+            POSTGRES_USER: root
+            POSTGRES_PASSWORD: root
+            POSTGRES_DB: ${DB_NAME}
+            PGDATA: /var/lib/postgresql/pgdata
+        volumes:
+            - ./docker/volume/pgsql:/var/lib/postgresql
+        ports:
+            - ${POSTGRES_PORT}:5432
+        networks:
+            - backend
+    rabbitmq:
+        hostname: rabbitmq
+        volumes:
+            - ./docker/volume/rabbitmq:/var/lib/rabbitmq # container rebuilding won't clear active queues.
+        restart: unless-stopped
+        image: rabbitmq:3-management
+        container_name: ${CONTAINER_NAME_PREFIX}-rabbitmq
+        ports:
+            - ${RABBITMQ_PORT}:5672   # RabbitMQ broker port
+            - ${RABBITMQ_UI_PORT}:15672 # RabbitMQ management plugin port
+        environment:
+            RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+            RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+            RABBITMQ_NODENAME: docker-rabbitmq
+        networks:
+            - backend
+    redis:
+        volumes:
+            - ./docker/volume/redis:/data
+        restart: unless-stopped
+        image: redis:latest
+        ports:
+            - ${REDIS_PORT}:6379
+        networks:
+            - backend
+
+volumes:
+    postgres_data:
+        external: false
+    rabbitmq_data:
+    redis_data:
+        external: false
+networks:
+    backend:
+        driver: bridge

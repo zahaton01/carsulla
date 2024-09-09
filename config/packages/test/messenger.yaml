@@ -1,0 +1,5 @@
+framework:
+    messenger:
+        transports:
+            amqp_doctors_sync: 'sync://'
+            amqp_doctor_slots_sync: 'sync://'
